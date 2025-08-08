@@ -64,23 +64,53 @@ This MCP server provides AI assistance for your addTaskManager productivity work
 
 ## Installation
 
+### From npm (Coming Soon)
+
 ```bash
-npm install -g @dragosroua/addTaskManager-mcp-server
+npm install -g @dragosroua/addtaskmanager-mcp-server
+```
+
+### From Source
+
+```bash
+git clone https://github.com/dragosroua/addtaskmanager-mcp-server.git
+cd addtaskmanager-mcp-server
+npm install
+npm run build
 ```
 
 ## Configuration
 
 ### Environment Variables
 
+The server supports both development and production configurations. Copy `.env.example` to `.env` and configure:
+
 ```bash
-# Required: Your addTaskManager CloudKit container identifier
-CLOUDKIT_CONTAINER_ID=iCloud.com.dragosroua.app.zentasktic
+# Environment
+NODE_ENV=production  # or development
+# FORCE_CLOUDKIT=true  # Force CloudKit in development
 
-# Required: CloudKit API token from CloudKit Dashboard
+# CloudKit Configuration (Required)
+CLOUDKIT_CONTAINER_ID=iCloud.com.yourapp.zentasktic
 CLOUDKIT_API_TOKEN=your_api_token_here
+CLOUDKIT_ENVIRONMENT=production  # or development
+CLOUDKIT_AUTH_METHOD=user  # or server-to-server
 
-# Optional: CloudKit environment (default: production)
-CLOUDKIT_ENVIRONMENT=production
+# Security Configuration (Production)
+ENCRYPTION_KEY=your_32_byte_encryption_key_here
+ALLOWED_ORIGINS=https://yourapp.com,https://localhost:3000
+RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
+RATE_LIMIT_MAX_REQUESTS=100
+AUDIT_LOGGING=true
+SESSION_TIMEOUT_MS=86400000  # 24 hours
+
+# Optional: For server-to-server authentication
+# CLOUDKIT_SERVER_KEY=your_server_key_id
+# CLOUDKIT_PRIVATE_KEY_PATH=/path/to/private/key.p8
+# CLOUDKIT_PRIVATE_KEY_PASSPHRASE=your_passphrase
+
+# Optional: Custom redirect URI
+# CLOUDKIT_REDIRECT_URI=https://yourapp.com/auth/callback
 ```
 
 ### CloudKit Dashboard Setup
@@ -94,15 +124,38 @@ CLOUDKIT_ENVIRONMENT=production
 
 ## Usage with Claude Desktop
 
-Add to your Claude Desktop MCP configuration:
+Add to your Claude Desktop MCP configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
 {
   "mcpServers": {
     "addTaskManager": {
-      "command": "addTaskManager-mcp-server",
+      "command": "node",
+      "args": ["/path/to/addtaskmanager-mcp-server/dist/index.js"],
       "env": {
-        "CLOUDKIT_CONTAINER_ID": "iCloud.com.dragosroua.zentasktic",
+        "NODE_ENV": "production",
+        "CLOUDKIT_CONTAINER_ID": "iCloud.com.yourapp.zentasktic",
+        "CLOUDKIT_API_TOKEN": "your_api_token_here",
+        "CLOUDKIT_ENVIRONMENT": "production",
+        "ENCRYPTION_KEY": "your_32_byte_encryption_key_here"
+      }
+    }
+  }
+}
+```
+
+For development:
+
+```json
+{
+  "mcpServers": {
+    "addTaskManager": {
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "/path/to/addtaskmanager-mcp-server",
+      "env": {
+        "NODE_ENV": "development",
+        "CLOUDKIT_CONTAINER_ID": "iCloud.com.yourapp.zentasktic",
         "CLOUDKIT_API_TOKEN": "your_api_token_here"
       }
     }
@@ -157,37 +210,87 @@ The server enforces these ADD framework restrictions:
 
 ```bash
 # Clone and install
-git clone https://github.com/dragosroua/addTaskManager-mcp-server.git
-cd addTaskManager-mcp-server
+git clone https://github.com/dragosroua/addtaskmanager-mcp-server.git
+cd addtaskmanager-mcp-server
 npm install
 
-# Development mode
+# Setup environment
+cp .env.example .env
+# Edit .env with your CloudKit credentials
+
+# Development mode with TypeScript compilation
 npm run dev
 
-# Build
+# Production build
 npm run build
 
-# Test
+# Start built server
+npm start
+
+# Code quality
+npm run lint
+npm run typecheck
+
+# Test (when available)
 npm test
 ```
+
+### Project Structure
+
+```
+src/
+├── config/
+│   └── production.ts          # Environment-based configuration
+├── services/
+│   ├── CloudKitService.ts     # CloudKit integration
+│   └── UserAuthService.ts     # User authentication
+├── types/
+│   └── cloudkit.ts           # TypeScript type definitions
+└── index.ts                  # Main MCP server implementation
+```
+
+### Development Notes
+
+- Uses ESM modules (type: "module" in package.json)
+- TypeScript compiled to `dist/` directory
+- Supports both development and production CloudKit environments
+- Environment-based configuration with security considerations
+- Comprehensive type definitions for CloudKit integration
 
 ## Architecture
 
 ```
-Web App → Apple Sign-In → CloudKit Auth Token
-    ↓
-MCP Server → CloudKit.js → addTaskManager Data
-    ↓
-ADD Framework Rules Enforcement
-    ↓
-AI Assistant (Claude) with Productivity Insights
+AI Assistant (Claude Desktop) → MCP Server → CloudKit Services
+                                    ↓
+                            Environment Config
+                            Security Controls
+                            User Authentication
+                                    ↓
+                            ADD Framework Rules
+                                    ↓
+                            addTaskManager Data
+                            (User's iCloud Container)
 ```
+
+### Component Overview
+
+- **MCP Server**: Model Context Protocol server implementation
+- **CloudKit Integration**: Production-ready CloudKit Web Services client
+- **Authentication**: Apple ID-based user authentication with session management
+- **Security Layer**: Encryption, rate limiting, audit logging, CORS protection
+- **ADD Framework**: Realm-based business logic enforcement
+- **Type Safety**: Comprehensive TypeScript definitions
 
 ## Security
 
-- **Authentication Required**: All operations require valid Apple ID authentication
+- **Environment-Based Security**: Different security profiles for development/production
+- **User Authentication**: Apple ID authentication with CloudKit web auth tokens
+- **Session Management**: Secure session handling with configurable timeouts
+- **Data Encryption**: Configurable encryption keys for sensitive data
+- **Rate Limiting**: Configurable request rate limiting with user-specific limits
+- **CORS Protection**: Configurable allowed origins for web app integration
+- **Audit Logging**: Comprehensive operation logging for security monitoring
 - **Data Isolation**: Users can only access their own addTaskManager data
-- **Domain Restrictions**: CloudKit API tokens are domain-restricted
 - **Realm Enforcement**: ADD framework rules prevent unauthorized operations
 
 ## About the ADD Framework
