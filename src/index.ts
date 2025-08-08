@@ -572,6 +572,19 @@ class AddTaskManagerMCPServer {
             inputSchema: { type: 'object', properties: {} }
           },
           {
+            name: 'moveToRealm',
+            description: 'Move a task or project to a specific realm.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                itemRecordName: { type: 'string', description: 'Record name of the task or project to move' },
+                itemType: { type: 'string', enum: ['Task', 'Project'], description: 'Type of item to move' },
+                realmId: { type: 'string', enum: ['assess', 'decide', 'do'], description: 'Target realm (assess=1, decide=2, do=3)' }
+              },
+              required: ['itemRecordName', 'itemType', 'realmId']
+            }
+          },
+          {
             name: 'get_collections',
             description: 'Get all collections.',
             inputSchema: { type: 'object', properties: {} }
@@ -732,6 +745,15 @@ class AddTaskManagerMCPServer {
             return await this.getProjectsByRealm(args.realm as RealmString);
           case 'get_ideas':
             return await this.getIdeas();
+          case 'moveToRealm':
+            this.validateArgs(args, ['itemRecordName', 'itemType', 'realmId']);
+            if (args.itemType === 'Task') {
+              return await this.moveTaskToRealm(args.itemRecordName, args.realmId);
+            } else if (args.itemType === 'Project') {
+              return await this.moveProjectToRealm(args.itemRecordName, args.realmId);
+            } else {
+              throw new McpError(ErrorCode.InvalidParams, 'itemType must be Task or Project');
+            }
           case 'get_collections':
             return await this.getCollections();
           case 'get_tasks_by_context':

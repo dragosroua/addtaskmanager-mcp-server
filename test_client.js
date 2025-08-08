@@ -114,6 +114,16 @@ async function runTests() {
       arguments: { contextRecordName: 'context_work' }
     }, 'Get tasks by work context');
     
+    // Test 9: Test new moveToRealm tool
+    await sendRequest('tools/call', {
+      name: 'moveToRealm',
+      arguments: { 
+        itemRecordName: 'test_task_123', 
+        itemType: 'Task', 
+        realmId: 'decide' 
+      }
+    }, 'Move task to Decide realm using moveToRealm tool');
+    
     console.log('✅ All tests completed successfully!');
     console.log('📊 Summary: Tested authentication, CRUD operations, and ADD framework queries');
     
