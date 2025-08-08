@@ -62,6 +62,9 @@ This MCP server provides AI assistance for your addTaskManager productivity work
 - `get_tasks_soon_in_do` - Find tasks done soon in Do
 - `get_tasks_overdue_in_do` - Find tasks overdue in Do
 
+### General Operations
+- `moveToRealm` - Move a task or project to any realm (assess/decide/do)
+
 ## Installation
 
 ### From npm (Coming Soon)
