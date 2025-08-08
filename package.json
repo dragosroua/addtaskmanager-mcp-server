@@ -1,7 +1,7 @@
 {
-    "name": "@dragosroua/zentasktic-mcp-server",
+    "name": "@dragosroua/addtaskmanager-mcp-server",
     "version": "1.0.0",
-    "description": "MCP server for ZenTasktic with ADD (Assess-Decide-Do) framework support",
+    "description": "MCP server for addTaskManager with ADD (Assess-Decide-Do) framework support",
     "main": "dist/index.js",
     "type": "module",
     "scripts": {
@@ -13,7 +13,7 @@
         "prepare": "npm run build"
     },
     "bin": {
-        "zentasktic-mcp-server": "dist/index.js"
+        "addtaskmanager-mcp-server": "dist/index.js"
     },
     "keywords": [
         "mcp",
@@ -33,9 +33,9 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/dragosroua/zentasktic-mcp-server.git"
+        "url": "git+https://github.com/dragosroua/addtaskmanager-mcp-server.git"
     },
-    "homepage": "https://zentasktic.com",
+    "homepage": "https://addtaskmanager.com",
     "license": "MIT",
     "engines": {
         "node": ">=18.0.0"
